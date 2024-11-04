@@ -115,15 +115,10 @@ def retrieve_similar_images(model, query_image, dataset, device, top_n=5):
     return [img for _, img in distances[:top_n]]
 
 def main(load_checkpoint_flag=False, checkpoint_path="checkpoint.pth"):
-    print("DATA LOADER FILE STARTED...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
-
     model = SiameseNetwork().to(device)
     criterion = ContrastiveLoss(margin=1.0)
     optimizer = optim.Adam(model.parameters(), lr=0.0003)
-
-    print("Model, criterion, and optimizer set")
 
     data = SiameseImageDataset(
         r"./OfficeHomeDataset_10072016/",
@@ -133,14 +128,12 @@ def main(load_checkpoint_flag=False, checkpoint_path="checkpoint.pth"):
     print("Data loaded...")
     dataloader = DataLoader(data, batch_size=64, shuffle=True, num_workers=2)
 
-    # Load checkpoint if flag is set
     start_epoch = 0
     if load_checkpoint_flag:
         start_epoch = load_checkpoint(checkpoint_path, model, optimizer)
 
-    # Train model
     train_siamese(model, dataloader, criterion, optimizer, device, epochs=10, checkpoint_path=checkpoint_path)
 
 
 if __name__ == "__main__":
-    main(load_checkpoint_flag=False)  # Set to False if you don't want to load the checkpoint
+    main(load_checkpoint_flag=False)

@@ -9,9 +9,7 @@ import pandas as pd
 from PIL import Image
 import torchvision.transforms as t
 from tqdm import tqdm
-from data_loader import SiameseImageDataset
-from model import *
-
+from sklearn.model_selection import train_test_split
 
 def save_checkpoint(model, optimizer, epoch, filepath="checkpoint.pth"):
     checkpoint = {
@@ -33,3 +31,5 @@ def load_checkpoint(filepath, model, optimizer):
     else:
         print("No checkpoint found at the specified path.")
         return 0
+
+    
