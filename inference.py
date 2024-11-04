@@ -21,7 +21,6 @@ def retrieve_images_from_class(dataset, class_name, num_images=5):
     """Retrieve a specified number of images from a given class."""
     class_images = dataset.df[dataset.df['name'].str.contains(class_name)]['name'].tolist()
     class_images = ["./OfficeHomeDataset_10072016"+cl for cl in class_images]
-    # print(class_images)
     return class_images[:num_images]
 
 def calculate_average_embedding(model, images, device):
@@ -65,11 +64,10 @@ def main():
 
     # Calculate average embedding for each class
     class_embeddings = {}
-    for class_name in unique_classes[:10]:
-        # print(f"Processing class: {class_name}")
+    for class_name in unique_classes:
+        print(f"Processing class: {class_name}")
         images = retrieve_images_from_class(dataset, class_name, num_images=5)
         avg_embedding = calculate_average_embedding(model, images, device).squeeze(0)
-        print (f"{class_name} : {avg_embedding.shape}")
         class_embeddings[class_name] = avg_embedding
 
     # Process the query image

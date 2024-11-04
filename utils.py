@@ -1,15 +1,13 @@
 import os
 import random
+import os
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-import pandas as pd
+from torch.utils.data import DataLoader
+from data_loader import SiameseImageDataset
+from model import SiameseNetwork
+import torchvision.transforms as transforms
 from PIL import Image
-import torchvision.transforms as t
-from tqdm import tqdm
-from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 def save_checkpoint(model, optimizer, epoch, filepath="checkpoint.pth"):
     checkpoint = {
@@ -32,4 +30,52 @@ def load_checkpoint(filepath, model, optimizer):
         print("No checkpoint found at the specified path.")
         return 0
 
+def retrieve_images_from_class(dataset, class_name, num_images=5):
+    """Retrieve a specified number of images from a given class."""
+    class_images = dataset.df[dataset.df['name'].str.contains(class_name)]['name'].tolist()
+    # print(class_images)
+    class_images = ["OfficeHomeDataset_10072016"+cl for cl in class_images]
+    return class_images[:num_images]
+
+def display_images(images, class_name):
+    """Display a list of images with the class name."""
+    plt.figure(figsize=(15, 5))
+    for i, img in enumerate(images):
+        plt.subplot(1, len(images), i + 1)
+        plt.imshow(img.permute(1, 2, 0))  # Change from (C, H, W) to (H, W, C)
+        plt.title(class_name)
+        plt.axis('off')
+    plt.show()
+
+def main():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = SiameseNetwork().to(device)
     
+    # Load the trained model (ensure the checkpoint path is correct)
+    checkpoint_path = "checkpoint.pth"  # Change to your checkpoint path if needed
+    load_checkpoint(checkpoint_path, model)
+
+    # Prepare the dataset
+    data_path = r"./OfficeHomeDataset_10072016/"
+    csv_file = r"./OfficeHomeDataset_10072016/datanew.csv"
+    dataset = SiameseImageDataset(data_path, csv_file)
+
+    # Get unique class labels
+    unique_classes = dataset.df['name'].apply(lambda x: x.split('/')[2]).unique()
+
+    # Loop through each class and retrieve images
+    for class_name in unique_classes:
+        print(f"Retrieving images for class: {class_name}")
+        images = retrieve_images_from_class(dataset, class_name, num_images=5)
+        
+        # Transform images to tensors
+        tensor_images = []
+        for img_path in images:
+            print(f"Loading image: {img_path}")  # Debug print
+            tensor_images.append(transforms.ToTensor()(Image.open(img_path).convert("RGB")))
+        
+        # Display images with their class label
+        display_images(tensor_images, class_name)
+
+if __name__ == "_main_":
+    main()
