@@ -9,25 +9,17 @@ import pandas as pd
 from PIL import Image
 import torchvision.transforms as t
 from tqdm import tqdm
-<<<<<<< HEAD
 import torch
 from torchvision.models import ResNet50_Weights  # Add this import
-=======
-from sklearn.model_selection import train_test_split
->>>>>>> 800e308c45a1a6dd8c00c5af101cebc4cd17da39
 
 class ResNet50FeatureExtractor(nn.Module):
     def __init__(self, pretrained=True):
         super(ResNet50FeatureExtractor, self).__init__()
-<<<<<<< HEAD
         # Load the pretrained ResNet-50 model, removing the last fully connected layer
         if pretrained:
             self.model = models.resnet50(weights=ResNet50_Weights.DEFAULT)  # Update here
         else:
             self.model = models.resnet50(weights=None)
-=======
-        self.model = models.resnet50(pretrained=pretrained)
->>>>>>> 800e308c45a1a6dd8c00c5af101cebc4cd17da39
         self.model = nn.Sequential(*list(self.model.children())[:-1])
 
     def forward(self, x):
@@ -35,12 +27,9 @@ class ResNet50FeatureExtractor(nn.Module):
         x = x.view(x.size(0), -1)
         return x
 
-<<<<<<< HEAD
 
 
 
-=======
->>>>>>> 800e308c45a1a6dd8c00c5af101cebc4cd17da39
 class SiameseNetwork(nn.Module):
     def __init__(self):
         super(SiameseNetwork, self).__init__()
