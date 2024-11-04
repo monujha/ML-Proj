@@ -11,19 +11,24 @@ from PIL import Image
 import torchvision.transforms as t
 from tqdm import tqdm
 import torch
-
+from torchvision.models import ResNet50_Weights  # Add this import
 
 class ResNet50FeatureExtractor(nn.Module):
     def __init__(self, pretrained=True):
         super(ResNet50FeatureExtractor, self).__init__()
         # Load the pretrained ResNet-50 model, removing the last fully connected layer
-        self.model = models.resnet50(pretrained=pretrained)
+        if pretrained:
+            self.model = models.resnet50(weights=ResNet50_Weights.DEFAULT)  # Update here
+        else:
+            self.model = models.resnet50(weights=None)
         self.model = nn.Sequential(*list(self.model.children())[:-1])
 
     def forward(self, x):
         x = self.model(x)
         x = x.view(x.size(0), -1)  # Flatten the output for embedding
         return x
+
+
 
 
 class SiameseNetwork(nn.Module):

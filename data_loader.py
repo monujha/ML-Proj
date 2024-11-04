@@ -9,6 +9,21 @@ import pandas as pd
 from PIL import Image
 import torchvision.transforms as t
 from tqdm import tqdm
+from sklearn.model_selection import train_test_split
+
+datapath = r'./OfficeHomeDataset_10072016/'
+csv_file = os.path.join(datapath, 'datanew.csv')
+
+
+df = pd.read_csv(csv_file)
+train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
+
+
+train_csv = os.path.join(datapath, 'train_pairs.csv')
+test_csv = os.path.join(datapath, 'test_pairs.csv')
+train_df.to_csv(train_csv, index=False)
+test_df.to_csv(test_csv, index=False)
+
 
 
 class SiameseImageDataset(Dataset):
@@ -61,7 +76,7 @@ class SiameseImageDataset(Dataset):
 
 
 def main():
-    data = SiameseImageDataset(r'C:/Users/monuk/Downloads/OfficeHomeDataset_10072016/project/OfficeHomeDataset_10072016', r'C:/Users/monuk/Downloads/OfficeHomeDataset_10072016/project/OfficeHomeDataset_10072016/datanew.csv')
+    data = SiameseImageDataset("./OfficeHomeDataset_10072016/", "./OfficeHomeDataset_10072016/datanew.csv")
     dataloader = DataLoader(data, batch_size=32, shuffle=True, num_workers=0)
     print(len(dataloader))
     c = 0
