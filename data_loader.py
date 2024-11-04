@@ -25,13 +25,11 @@ train_df.to_csv(train_csv, index=False)
 test_df.to_csv(test_csv, index=False)
 
 
-
 class SiameseImageDataset(Dataset):
     def __init__(self, datapath, csv_file):
         super(SiameseImageDataset, self).__init__()
         self.datapath = datapath
         self.df = pd.read_csv(csv_file, index_col=None, header=0)
-        
         
         self.label_to_images = {}
         for _, row in self.df.iterrows():
@@ -39,7 +37,6 @@ class SiameseImageDataset(Dataset):
             if label not in self.label_to_images:
                 self.label_to_images[label] = []
             self.label_to_images[label].append(row['name'])
-        
         
         self.train_transform = t.Compose([
             t.Resize([224, 224]),
@@ -53,7 +50,6 @@ class SiameseImageDataset(Dataset):
         img1_path = self.df['name'][index]
         label1 = img1_path.split('/')[2]
 
-        
         is_positive_pair = random.choice([True, False])
 
         if is_positive_pair:
@@ -66,26 +62,16 @@ class SiameseImageDataset(Dataset):
             img2_path = random.choice(self.label_to_images[label2])
             label = 0
 
-        img1 = Image.open(self.datapath + img1_path)
-        img2 = Image.open(self.datapath + img2_path)
+        img1 = Image.open(os.path.join(self.datapath, img1_path)).convert('RGB')
+        img2 = Image.open(os.path.join(self.datapath, img2_path)).convert('RGB')
         img1 = self.train_transform(img1)
         img2 = self.train_transform(img2)
 
         return (img1, img2), torch.tensor(label, dtype=torch.float32)
 
+    def get_images_by_label(self, label, count=5):
+        """ Retrieve a specified number of images for a given label. """
+        image_paths = self.label_to_images.get(label, [])
+        return random.sample(image_paths, min(count, len(image_paths)))
 
 
-def main():
-    data = SiameseImageDataset("./OfficeHomeDataset_10072016/", "./OfficeHomeDataset_10072016/datanew.csv")
-    dataloader = DataLoader(data, batch_size=32, shuffle=True, num_workers=0)
-    print(len(dataloader))
-    c = 0
-    for (img1, img2), lbl in dataloader:
-        if (c>10):
-            break
-        print (img1.shape, img2.shape, lbl.shape)
-        c = c + 1
-        
-        
-if __name__=="__main__":
-    main()
